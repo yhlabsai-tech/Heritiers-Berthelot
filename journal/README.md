@@ -77,3 +77,31 @@ Speed up transcription: first switch the WhisperX model from medium to small (2�
 Build the map-reduce summarization path for long meetings.
 Automate the trigger on a watched folder (Local File Trigger) so the flow runs with zero clicks.
 Association: send the statutes to review, then file with the prefecture; start a prototype of the web app.
+
+# 2026-08-01 — Self-hosted n8n stack on Windows, driven by Claude Code (MCP)
+
+## What I did
+
+Rebuilt a self-hosted n8n automation stack from scratch — this time not on the MacBook but on a Windows 11 laptop (i7-13700H, 32 GB RAM), so I had to redo the whole environment. Got it running end to end, versioned, and pushed to GitHub.
+
+Enabled WSL2 + Ubuntu, installed Docker Desktop with WSL integration. All the Linux work lives inside WSL; nothing touches Windows directly.
+Deployed n8n + PostgreSQL via docker-compose, with persistent volumes, secrets isolated in a .env, and a saved N8N_ENCRYPTION_KEY.
+Turned on n8n's native instance-level MCP server and generated an access token.
+Installed Claude Code, fixed its PATH, and connected it to n8n over MCP. Once connected it exposes 34 n8n tools (search nodes, build, validate, run).
+Built and ran a first throwaway workflow (Manual Trigger → Set) entirely through a Claude Code prompt, to prove the chain works: I describe → Claude builds in n8n → I check.
+Set up Git, wrote an export script that dumps each workflow to JSON, and pushed the whole stack to a new private repo automatisation.
+
+## What I decided (and why)
+
+Quality over speed, even on a borrowed machine. I could have run n8n with a one-line npm install and SQLite. I chose Docker + PostgreSQL instead: SQLite buckles on concurrent executions and large automations, and I want a foundation that scales to real YH Labs work, not a throwaway. The extra setup cost buys robustness I'll need later.
+Isolate everything in WSL/Docker, nothing in Windows itself. It keeps my father's machine clean and the whole thing fully reversible (unregister the distro, uninstall Docker, done). It also means no Python or other runtime to install on the host — n8n's code runs inside the container. Docker's whole point is that the execution environment is self-contained.
+Native MCP + Claude Code over the visual canvas. I'd rather describe automations in natural language and version them as code than drag nodes around. It fits my GitHub/Python habits and makes the work reproducible.
+Treat automations as code. The workflow JSON lives in Git, not just in n8n's database — so I get history, diffs, rollback, and can rebuild the whole instance from the repo. That's the difference between a fragile black box and a maintainable asset.
+Security as a habit, not an afterthought. Secrets (.env, encryption key, tokens) never touch Git; I verified it with git check-ignore before pushing, since a push is irreversible. Honest caveat: I did leave an n8n token visible in a screenshot and chose not to regenerate it — the risk is near-zero on a local-only instance, but it's exactly the kind of corner I should stop cutting before I handle client credentials.
+
+## What's next
+
+Choose and build the first real automation. This is the actual point of the stack. Two candidates: YH Labs prospection (collect → qualify → sequenced follow-ups) or association management (memberships, communications). The test workflow gets deleted once a real one exists.
+Make ./scripts/export.sh a reflex after every build session, so nothing lives only in n8n's database.
+Open question I'm holding: whether to keep this Windows stack separate from the Mac meeting-minutes pipeline, or eventually consolidate them.
+Longer term: this runs on my father's machine — move it to my own machine or a small dedicated server when the project justifies it.
