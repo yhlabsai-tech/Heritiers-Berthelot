@@ -106,7 +106,7 @@ Make ./scripts/export.sh a reflex after every build session, so nothing lives on
 Open question I'm holding: whether to keep this Windows stack separate from the Mac meeting-minutes pipeline, or eventually consolidate them.
 Longer term: this runs on my father's machine — move it to my own machine or a small dedicated server when the project justifies it.
 
-# 2026-08-08 — Mac stack rebuilt, statutes and internal rules sent
+# 2026-08-02 — 2026-08-08 - Mac stack rebuilt, statutes and internal rules sent
 
 ## What I did
 
