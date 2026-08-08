@@ -105,3 +105,107 @@ Choose and build the first real automation. This is the actual point of the stac
 Make ./scripts/export.sh a reflex after every build session, so nothing lives only in n8n's database.
 Open question I'm holding: whether to keep this Windows stack separate from the Mac meeting-minutes pipeline, or eventually consolidate them.
 Longer term: this runs on my father's machine — move it to my own machine or a small dedicated server when the project justifies it.
+
+# 2026-08-08 — Mac stack rebuilt, statutes and internal rules sent
+
+## What I did
+
+Slower week overall — school holidays, and the team is scattered. Still, two things
+moved: the association's founding documents went out, and I rebuilt the automation
+stack on my own machine.
+
+**Association (1–8 August):**
+
+- Logo designed and validated by the team.
+- Statutes and internal rules finalised over the week and **sent officially today**.
+- Pace deliberately slower than in July. Everyone is on holiday; I'd rather have
+  documents that hold up than documents sent fast.
+
+**Automation stack (Mac):**
+
+Rebuilt the whole chain on the MacBook — Docker Desktop → n8n + PostgreSQL →
+n8n-mcp → Claude Code + VS Code — so I stop depending on my father's Windows
+laptop.
+
+- Inspected the existing `docker-compose.yml` before touching anything. It was
+  already PostgreSQL 16 with named volumes, matching the Windows architecture.
+  The migration I'd planned turned out to be unnecessary.
+- Hit an encryption-key mismatch: the `n8n_data` volume held one key, the `.env`
+  another. n8n refuses to start in that state.
+- Lost the n8n password. Reset the owner account from the CLI
+  (`n8n user-management:reset`) after dumping the database — 6.7 MB backup.
+  Workflows and credentials survived intact, including the meeting-minutes
+  pipeline from July.
+- Installed Node.js, Claude Code (native installer), and registered `n8n-mcp`
+  at project scope.
+- First MCP call failed: `n8n-mcp` ships an SSRF guard that blocks localhost by
+  default. Fixed with `WEBHOOK_SECURITY_MODE=moderate`.
+- Cleaned up VS Code (7 extensions down to 6) and installed the Claude Code
+  extension.
+
+**Mistake worth recording:** I assumed Claude Code needed Node.js and installed
+Node for that reason. It doesn't — the native installer is standalone. Node was
+still needed, but for `npx`, which runs `n8n-mcp`. Right action, wrong reasoning.
+I checked the official docs only after giving myself the answer.
+
+## What I decided (and why)
+
+**Align the `.env` to the volume's key, never the reverse.** The obvious move was
+to wipe the volume and start clean. That would have been the worst outcome:
+workflows and credentials live in PostgreSQL, encrypted with the key stored in
+the n8n volume. Wiping one leaves the other orphaned — visible workflows with
+permanently unreadable credentials. Aligning the `.env` is reversible and keeps
+both volumes coherent.
+
+**Back up before any reset, even a documented one.** The `user-management:reset`
+command is supposed to leave workflows untouched, and it did. I dumped the
+database first anyway. Ten seconds against the risk of losing July's pipeline.
+
+**Register the MCP server at project scope, not globally.** This finally explains
+the rule I'd noted on Windows without understanding it — that I must `cd` into the
+project before launching `claude`. The configuration lives in
+`~/n8n-local/.mcp.json`; launch from elsewhere and the file isn't read. It was
+never a quirk of the tool, just a consequence of the scope I'd chosen. In VS Code
+the same rule becomes: open `n8n-local` as the workspace root.
+
+**A technical lock beats a written convention.** I wanted a rule against deleting
+workflows through prompts. Writing it in a `CLAUDE.md` would only be a
+recommendation the model follows willingly. Instead I disabled the tool itself
+(`DISABLED_TOOLS=n8n_delete_workflow`). Deletion is still possible from the n8n
+interface, where I can see what I'm doing. **Honest caveat:** `n8n_workflow_versions`
+is still enabled and can restore or prune versions, so the destructive path isn't
+fully closed.
+
+**`moderate`, not `permissive`, for the SSRF guard.** The permissive mode would
+also open private network ranges. I only need localhost.
+
+**VS Code over the bare terminal.** No performance difference — same engine, same
+model, same MCP tools. The choice is purely ergonomic, and my work is
+file-and-Git-centred, which is exactly where a bare terminal loses.
+
+**Security note:** VS Code 1.132 now ships a native agent host. It read my
+`.mcp.json`, which contains the n8n API key in plaintext. Low risk here — local
+instance, key expires 6 November — but the principle stands: any agent opened on
+that folder sees that file. `.mcp.json` never goes into Git.
+
+## What's next
+
+**Association (team):**
+
+- Open LinkedIn and Instagram accounts — the communication division's first
+  concrete step.
+- Keep prospecting for future mentors.
+
+**My side:**
+
+- Carry on building out the ecosystem on my own machine, and keep training on it.
+  Concretely, the open threads are: a `CLAUDE.md` for the stack (architecture,
+  conventions, validate-before-publish), n8n's instance-level MCP server so
+  automations can be triggered and not only built, and WhisperX restarted on
+  demand to re-test the meeting pipeline.
+- Train specifically on the automations the association will need: administrative
+  workflows, Drive management, automated emails.
+
+*What this gives the association: the environment set up today — Claude Code and
+VS Code, configured and verified — is the one I'll build the platform in. The
+Next.js work starts from here rather than from a blank machine.*
