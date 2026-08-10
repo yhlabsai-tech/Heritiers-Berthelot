@@ -209,3 +209,36 @@ that folder sees that file. `.mcp.json` never goes into Git.
 *What this gives the association: the environment set up today — Claude Code and
 VS Code, configured and verified — is the one I'll build the platform in. The
 Next.js work starts from here rather than from a blank machine.*
+
+# 2026-08-09 — First event planning meeting, Conda incident, and prompt hardening
+## What I did
+
+Team meeting to organize the association's first event — a welcome gathering for incoming ECG1 students — plus a technical fix on the meeting-minutes pipeline and the last steps of the VS Code / Claude Code setup.
+
+**Association:**
+
+Reviewed the week's objectives with the team: statutes sent ✅, minutes drafted ✅, mail to Thamma for the alumni network ✅, mentorat/tutorat document created ✅, Romain's Drive split up ✅, list of incoming students requested from Amyot ✅.
+Wrote and circulated a full planning document on the association's WhatsApp, covering location and schedule, event goals, food/drinks, activities, equipment, communication (before and during the event), and the responsibilities still needing an owner (food, games, setup, photos/video, comms, welcoming, cleanup).
+Assigned the open tasks for the coming days: Rayane — file the association with the prefecture and propose a logo; Elyes — contact the town hall and advance the tutor/mentor handbook; Enzo — fill out and improve the two mentorat/tutorat docs; Alexandre — logo.
+
+**Automation stack:** 
+
+WhisperX had stopped responding on port 9000. Root cause: a prior troubleshooting session (outside this stack, using ChatGPT) had misdiagnosed the problem, checked the wrong Conda paths (~/miniconda3, ~/anaconda3 instead of the real /opt/anaconda3), and installed a duplicate Miniconda via Homebrew — which silently masked the real whisperx environment instead of fixing anything. Diagnosed the real path, confirmed the original environment and its binaries were untouched, cleaned the duplicate conda initialize block out of .zshrc, and restarted the Docker stack.
+Rewrote the OpenAI structuring prompt: split into a System message (fixed instructions only) and a User message (transcript as an expression variable), added two new JSON keys — pistes and points_non_tranches — and upgraded the model. Re-ran it on the actual meeting transcript from this session; the output correctly captured details the previous version missed (domain name cost, membership fee amount, bakery partnerships, newsletter format) and correctly separated an individual's funding wish from an actual group decision.
+Finished the VS Code + Claude Code setup: n8n-mcp verified at project scope (24 tools), Docker images pinned to exact versions, CLAUDE.md updated.
+
+## What I decided (and why)
+
+Check the real path before trusting someone else's diagnosis — including a past AI session's. The Conda "break" wasn't a break at all: the environment was fine at /opt/anaconda3/envs/whisperx, but a previous session never checked that path and layered a second Conda install on top. One command against the actual path settled it, instead of reinstalling anything.
+All event-planning points get locked before August 17. That's the date the administration needs the information to relay it to incoming ECG1 students, so the whole planning doc treats it as the hard deadline rather than a soft target.
+New JSON keys plug into the existing formatting node, not into a new one. pistes and points_non_tranches extend the same Code node that already builds the HTML — confirms the analysis/formatting split decided two weeks ago was the right call, since adding fields didn't require touching the LLM step's architecture.
+
+## What's next
+
+Lock the event's final date, activity list, headcount estimate, and material/food ownership before August 17.
+Update the JavaScript formatting node so pistes and points_non_tranches actually reach the email output — the prompt already returns them.
+Enable diarisation (pyannote) in WhisperX for speaker attribution.
+Run a full end-to-end pipeline test on a real, unedited meeting recording.
+Association: préfecture filing (Rayane), town hall contact (Elyes), first social media accounts.
+
+What this gives the association: [à valider avec toi — je te propose une piste, dis-moi si tu gardes] a hardened structuring prompt and a documented Conda incident mean the meeting-minutes pipeline survives external meddling without losing a session's worth of transcripts, right as the event-planning cadence picks up and the team starts generating more minutes to process.
