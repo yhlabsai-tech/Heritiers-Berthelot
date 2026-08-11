@@ -242,3 +242,103 @@ Run a full end-to-end pipeline test on a real, unedited meeting recording.
 Association: préfecture filing (Rayane), town hall contact (Elyes), first social media accounts.
 
 What this gives the association: [à valider avec toi — je te propose une piste, dis-moi si tu gardes] a hardened structuring prompt and a documented Conda incident mean the meeting-minutes pipeline survives external meddling without losing a session's worth of transcripts, right as the event-planning cadence picks up and the team starts generating more minutes to process.
+
+# 2026-08-11 — Bureau formalized, and the platform's Phase 0 is done
+
+## What I did
+
+Two fronts moved today: the association's governance structure got its first
+formal shape, and the web platform went from "not started" to a working
+Supabase backend with a real schema.
+
+**Association:**
+
+- Enzo laid out the full bureau structure on WhatsApp: Président (Romain
+  Very), two Vice-Présidents (Rayane Saalaoui, Enzo Pruvost-A), Trésorier
+  (Lucas Corte), and three Secrétaires Généraux, one per pôle — tutorat/
+  mentorat (Elyes Bahnis), application (me), and événementiel (Alexandre
+  Pithon-Laumônier). Each pôle other than the application one is structured
+  as a committee: one SG plus three "responsables de pôle" who sit under
+  them but outside the bureau itself. The événementiel pôle got its three
+  responsables named on the spot: Karla, Dorothée, Éléa.
+- Event date narrowed down: August 29 proposed as a target, pending an
+  availability check across the team before it's locked.
+- Logo finished by Alexandre and delivered as a ZIP (building-only version +
+  full logo). Instagram and LinkedIn account creation is now unblocked for
+  tomorrow; Thamma/Tercero will redirect alumni toward them once they're up.
+- Flagged what I'll need next for the app: a merged directory of contacts —
+  what Arthur already collected, what we already have, and what's still
+  missing — plus alumni emails and current P1/P2 students added to that same
+  directory, since it will double as the seed data for account creation.
+
+**Platform (Next.js + Supabase) — Phase 0:**
+
+- Created the Supabase project (Paris region), initialized a private
+  `heritiers-berthelot-app` repo in Next.js 16, pushed it to GitHub, and
+  linked the Supabase CLI to the project.
+- Wrote and applied the initial migration: 9 tables, RLS enabled on all of
+  them, 7 custom types, 4 functions, 2 triggers (profile creation on
+  signup, and a lock trigger), 26 RLS policies, and an `avatars` storage
+  bucket.
+- Hit three real incidents in the process — an empty migration pushed by
+  mistake, a `supabase migration repair` to fix the resulting history
+  mismatch, and a SQL string-escaping bug (double quotes where the file
+  needed doubled single quotes, e.g. in `Côte d''Ivoire`). All three
+  resolved; `supabase db push` now reports the remote database up to date.
+- Generated the TypeScript types from the live schema
+  (`lib/types/database.ts`, 534 lines) and confirmed a known column
+  (`statut_parcours`) resolves correctly — proof the generated types match
+  the real schema, not a stale draft.
+- Committed and pushed: `supabase/` and `lib/types/` are now in Git, not
+  just applied to the remote database.
+
+## What I decided (and why)
+
+- **Every file edit is a full regeneration, never a partial patch.** I'd
+  been sending partial SQL edits while also asking for full files elsewhere
+  — inconsistent, and it's exactly how a copy-paste lands in the wrong
+  place in an editor. One rule from now on: any change to a file means the
+  whole file gets regenerated, destination stated first.
+- **Registration stays open to everyone in v1; the validation mechanic is
+  built but dormant.** Gating signups behind manual approval would slow
+  down exactly the alumni-outreach push happening on WhatsApp right now.
+  The validation logic exists in the schema so it can be switched on later
+  without a migration, but it isn't enforced yet.
+- **Progression status and filière choice are separate fields, not one.**
+  Conflating "where someone is in the program" with "which track they
+  picked" would have made the RLS policies and the profile logic depend on
+  a single column doing two jobs — splitting them now avoids a schema
+  change later once real data exists.
+- **No agent team on this project until I can read an RLS policy myself.**
+  It would be faster to let an agent generate and apply policies
+  autonomously, but a wrong RLS policy silently leaks or blocks data with
+  no error message. I'm keeping this manual, migration-by-migration, until
+  I trust my own review of what each policy actually does.
+- **Committee structure for every pôle except application.** Application
+  stays a single SG (me) for now rather than a three-person committee —
+  the pôle is technical, not coordination-heavy, and adding responsables
+  before there's a codebase to split work on would create roles without
+  real tasks.
+
+## What's next
+
+**Association:**
+
+- Confirm the event date (currently August 29, pending availabilities) and
+  finish assigning event-day responsibilities.
+- Get Instagram and LinkedIn live tomorrow; send the "accounts are ready"
+  mail to Thamma/Tercero so alumni get redirected.
+- Build the merged contacts directory (Arthur's data + what we have +
+  what's missing), and collect P1/P2 emails to seed it.
+
+**Platform:**
+
+- Environment variables and the Supabase client (`lib/supabase/`).
+- Authentication: signup, login, profile page — this is the start of Phase 1.
+- Non-code task, can happen between sessions: write the membership form's
+  line collecting email + directory consent, since it gates everything
+  downstream (the directory, the accounts, the outreach).
+- Write up the migration incidents (empty push, repair, SQL escaping) in
+  detail somewhere — they're the kind of mistake worth documenting exactly
+  because they're the ones everyone hits once.
+
