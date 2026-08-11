@@ -314,11 +314,13 @@ Supabase backend with a real schema.
   autonomously, but a wrong RLS policy silently leaks or blocks data with
   no error message. I'm keeping this manual, migration-by-migration, until
   I trust my own review of what each policy actually does.
-- **Committee structure for every pôle except application.** Application
-  stays a single SG (me) for now rather than a three-person committee —
-  the pôle is technical, not coordination-heavy, and adding responsables
-  before there's a codebase to split work on would create roles without
-  real tasks.
+- **Application is the one pôle I took by choice, not the presidency.** The
+  app was my project before the bureau existed — it's the reason I stepped
+  back from the presidency in the first place (see 2026-07-30). Being SG of
+  that pôle rather than président keeps me on the build side, which is
+  where I actually want to be. Whether it grows a three-person committee
+  like the other pôles is a separate, later question — there's no codebase
+  yet to split work on.
 
 ## What's next
 
@@ -341,4 +343,3 @@ Supabase backend with a real schema.
 - Write up the migration incidents (empty push, repair, SQL escaping) in
   detail somewhere — they're the kind of mistake worth documenting exactly
   because they're the ones everyone hits once.
-
