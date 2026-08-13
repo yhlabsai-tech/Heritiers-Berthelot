@@ -343,3 +343,103 @@ Supabase backend with a real schema.
 - Write up the migration incidents (empty push, repair, SQL escaping) in
   detail somewhere — they're the kind of mistake worth documenting exactly
   because they're the ones everyone hits once.
+
+# 2026-08-13 — v1 scope cut down, auth flow under construction, first outreach to teachers
+
+## What I did
+
+Spent the session narrowing the platform's v1 scope down to something
+actually buildable, then started implementing the first slice of it —
+authentication — and hit a real ambiguity in Supabase's email-confirmation
+flow along the way. Also sent the first formal outreach email to the
+teaching staff.
+
+**Scoping:**
+
+- Walked through the full feature list I'd drafted (messaging, feed,
+  profiles, multi-criteria search, parents) against what a handful of early
+  users actually need. Only one item survived unchanged: a centralized poll
+  for oraux blancs availability — the one piece of the whole list tied to a
+  real, dated, currently-felt pain point.
+- Cut messaging from v1 entirely, replacing it with a "request to connect"
+  flow (three-line message → email to the alumni → accept/refuse). Cut
+  free-text profile descriptions in favor of structured fields (promo,
+  école, secteur, ville, pays from closed lists) plus a separate free bio.
+  Cut parents from v1 — kept in the roadmap, not coded.
+- Wrote out the GDPR constraints that shape the architecture before any
+  code: Supabase region must be EU (Paris/Frankfurt, irreversible after
+  project creation), registration must be closed (allowlist or manual
+  validation, never open), and importing the association's existing
+  spreadsheet directory into the app counts as a new processing activity
+  that requires informing the people in it first.
+
+**Data model and auth:**
+
+- Drafted the v1 schema: `profiles`, `allowlist` (the existing directory,
+  matched on email — never on name), `posts` (info/event/poll), `poll_options`
+  / `poll_votes` (non-anonymous, tied to a profile), `demandes_relation`.
+  Row Level Security rules sketched per table.
+- Realized the sequencing question I'd been treating as "feed vs. directory
+  in parallel" was really "identity first, then two branches" — the feed
+  needs a profile, not the directory, so identity isn't optional scaffolding,
+  it's the actual prerequisite.
+- Started the real auth flow. Hit a wall: Supabase's shared email service
+  won't let me customize confirmation templates without a personal SMTP
+  server, and the default confirmation link's parameter format (`code` vs.
+  `token_hash`) is ambiguous in the docs depending on the auth flow used.
+- Built a route handler that accepts both parameter forms rather than
+  guessing which one applies, and a `REPORTS.md` tracking deferred items
+  (custom SMTP being the next one to become blocking).
+- Testing the real signup flow with my own allowlisted address is the next
+  concrete step — the actual URL received is the only way to settle which
+  parameter format Supabase is sending, not the documentation.
+
+**Association:**
+
+- Sent the first formal email to the teaching staff: statutes and internal
+  rules filed with the prefecture, the pre-rentrée event underway, the app
+  foundations in progress, and three concrete asks — the list of ECG alumni
+  from Berthelot, a convention on using the lycée's name and visual identity
+  (logo, typography), and a WhatsApp group for bureau/teachers/administration
+  coordination. Also flagged the funding reality plainly: insurance, a
+  domain name, server costs, and a proposed €5–10 membership fee.
+
+## What I decided (and why)
+
+- **Identity is a prerequisite, not a feature to schedule alongside others.**
+  I'd been planning to build the feed and the directory "in parallel." They
+  can, but only after profiles, roles, and validation exist — the feed
+  depends on identity, the directory doesn't need the feed. Attacking all
+  three at once would produce three half-built features and ship none of
+  them.
+- **No feature ships without an external deadline.** A prépa schedule will
+  always lose to actual math homework if the only pressure on this project
+  is my own motivation. Oraux blancs (October–December) gives the poll
+  feature a real date; the pre-rentrée event gives the directory an email
+  list to seed itself with. Both are now anchored to dates I don't control.
+- **Roles are never self-declared.** They come from the allowlist or an
+  admin, never from a signup form field — otherwise the first person to
+  register can call themselves "professeur" and post as one.
+- **Diagnose before guessing, even against ambiguous documentation.** Rather
+  than picking one interpretation of Supabase's auth-link format and hoping
+  it's right, the route handler accepts both known forms, and the real
+  answer comes from testing an actual signup and reading the resulting URL.
+- **Existing directory data isn't free to reuse.** It was collected for a
+  spreadsheet, not an app — importing it into the platform is a new GDPR
+  processing activity that needs its own notice to the people in it before
+  the import happens.
+
+## What's next
+
+- Run the real signup test (my own allowlisted address) and read the
+  confirmation URL to settle the `code` vs. `token_hash` question for good.
+- Configure a personal SMTP provider (Resend) before opening registration,
+  to unblock French-language templates and remove the "before code" excuse
+  it currently has.
+- Finish the identity layer (profiles + roles + validation), then move to
+  the feed and directory branches.
+- Write the GDPR notice that has to go out before the existing spreadsheet
+  directory is imported as `allowlist`.
+- Association: follow up with teachers on the alumni list, the naming/logo
+  convention, and the WhatsApp group request.
+
