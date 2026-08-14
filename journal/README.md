@@ -443,3 +443,114 @@ teaching staff.
 - Association: follow up with teachers on the alumni list, the naming/logo
   convention, and the WhatsApp group request.
 
+# 2026-08-14 — Feed and polls close the beta loop; social presence goes live
+
+## What I did
+
+Two fronts closed today: the platform's beta became functional end to end,
+and the événementiel/communication pôle took the association's first public
+presence live on LinkedIn, Instagram, and Facebook.
+
+**Platform — feed and polls:**
+
+- Built the feed and polls feature (posts, poll options, votes) on top of the
+  existing schema, then pushed the migration and regenerated the TypeScript
+  types.
+- Building the feed surfaced three real gaps the schema had been carrying
+  since the start:
+  - `posts.auteur_id` pointed at the directory (`annuaire`), which is a
+    closed, curated table — a professor removed from the directory would
+    have had their posts silently unsigned. Fixed by pointing authorship at
+    `profiles` instead: publishing is about identity, not about being
+    listed.
+  - Same bug on the votes side — poll votes need to show who voted, not
+    just a count, because the whole point of the oraux-blancs poll is
+    knowing who to actually write to in November.
+  - `cloture_le` (a poll's closing date) existed as a column but no policy
+    ever read it — votes were accepted after closing, and even against a
+    guessed option ID on an unpublished draft. A date with no enforcement
+    is worse than no date at all.
+- Confirmed multiple-choice is intentional in the schema: the primary key is
+  `(option, profil)`, not `(post, profil)`, so a professor can mark
+  themselves available for both October and November oraux blancs.
+- Settled on a draft-then-publish pattern for poll creation: the two writes
+  (post + options) aren't wrapped in a client-side transaction, so a failed
+  options write must leave an invisible draft, not a poll with no answers
+  visible in everyone's feed.
+- Beta is now functional end to end: identity, directory, admin, feed,
+  polls. What's left before opening to a second member is service work, not
+  product work — logged as a five-item blocker list.
+
+**Association — public launch:**
+
+- LinkedIn company page is live (`Les Héritiers de Berthelot — Rassembler
+  pour transmettre`, based Saint-Maur-des-Fossés), Instagram and Facebook
+  pages created the same day.
+- Wrote the founding "About" text: the concrete problem that started the
+  project (struggling to reach alumni during oral exam prep, LinkedIn
+  outreach going unanswered, Arthur's existing directory limited to top-5
+  math students), the four founding pôles, and the mission.
+- Iterated with the team on the banner and logo across several rounds —
+  wrong LinkedIn banner dimensions caught and fixed, the logo appearing
+  twice in inconsistent styles flagged and resolved, a lighter/more
+  legible version chosen over the first pass.
+- Split messaging by platform on purpose: LinkedIn keeps the longer
+  storytelling version, Instagram gets a shorter three-pillar summary
+  (Mentorat, Plateforme, Événements) to avoid the two posts reading as
+  duplicates.
+- Confirmed the association explicitly targets ECG-only for now — Enzo
+  flagged the risk of scientifique/littéraire prépa students expecting
+  tutoring access from seeing the page, so the bio and posts state the
+  scope directly rather than leaving it implicit.
+- Professional email address discussed and deliberately deferred — nobody
+  has picked it up yet and enough is already shipping today without it.
+
+## What I decided (and why)
+
+- **Identity, not directory membership, is what "signing" a post means.**
+  The bug the feed surfaced wasn't cosmetic: conflating "listed in the
+  annuaire" with "has an account" would have silently unsigned real
+  content the moment someone left the directory. Authorship now points at
+  the identity layer, matching the sequencing decision from two days ago —
+  everything really does depend on profiles, not on the directory.
+- **A poll with no visible voters isn't useful.** Anonymizing poll votes
+  would have looked more privacy-conscious but defeats the actual use case:
+  the association needs to know who's available for oraux blancs, not just
+  how many people are.
+- **An unenforced closing date is a liability, not a feature half-built.**
+  Rather than ship `cloture_le` as decorative and fix it later, it got wired
+  into the policies today — a date that silently does nothing is worse than
+  not having the column.
+- **State the target audience explicitly rather than let people assume.**
+  ECG-only wasn't a given from the outside — a prépa scientifique student
+  seeing the page could reasonably expect tutoring access. Saying it plainly
+  in the bio avoids disappointing people the association isn't built for
+  yet, and keeps the roadmap (expanding to other filières later) honest
+  about being a later step, not a current one.
+- **SMTP is now a core-feature blocker, not an onboarding nice-to-have.**
+  It stopped being about welcome-email wording the moment polls went live —
+  without it, reopening a poll for oraux blancs has no way to notify
+  professors, which recreates the exact email-chain problem the platform
+  was supposed to remove. Reclassified accordingly in the project's tracked
+  blockers.
+
+## What's next
+
+- Clear the five remaining blockers before opening the platform to a second
+  member.
+- Configure SMTP (Resend) — now blocking the poll notification loop, not
+  just template translation.
+- Finish the Instagram launch post (last slide pending, Flora posting
+  tomorrow morning) and coordinate the Facebook page's admin access.
+- Consider a shared visual identity (DA) system — logo, banner, and post
+  formats currently don't match, and the team flagged it as worth solving
+  once, not per-asset.
+- Cross-post the LinkedIn/Instagram links into the existing class WhatsApp
+  groups per year group.
+
+*What this gives the association: [à valider avec toi] the platform's core
+loop — sign up, get listed, post, poll — is provably real now instead of
+planned, and the association has a public face for the first time, which
+means the alumni-outreach ask sent to teachers this week finally has
+somewhere to point people.*
+
