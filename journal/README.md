@@ -653,3 +653,125 @@ presence live on LinkedIn, Instagram, and Facebook.
 - Cross-post the LinkedIn/Instagram links into the existing class WhatsApp
   groups per year group.
 
+# 2026-08-16 — Going live, and two lessons in method
+
+`https://lesheritiersdeberthelot.fr` is live. Signup works end to end,
+outgoing mail is sent from the association's own address, and anyone can now
+create an account.
+
+## What I did
+
+**Domain and mailboxes:** `lesheritiersdeberthelot.fr` registered with OVH
+under Romain's name as président, on the association's Google account.
+Mailboxes are named by function — `contact@`, `donnees@`, `application@`,
+`evenements@`, `tutorat@`, `bonjour@` — not by person, for the same reason
+as always: a bureau turns over, and it's easier to change a password than
+every address printed on every document.
+
+**Email sending,** through OVH's SMTP, from a mailbox dedicated to the app.
+I'd originally recommended a specialized transactional-email service;
+writing the processing register changed my mind. A dedicated service sees
+every member's address pass through it — that's one more data processor to
+name in the charter, with a clause on transfers outside the EU to get
+right, which means a new charter version, which means everyone re-accepting
+it. OVH already hosts our mailboxes, already appears in the legal notice,
+and is French — no new declaration needed. The accepted trade-off: no
+deliverability statistics. At our scale, that doesn't bite.
+
+**SPF, DKIM, and DMARC** are in place. DMARC runs in monitoring mode: it
+blocks nothing, it just reports who's sending mail as us. Enforcement comes
+once the reports confirm everything we send is properly signed — tightening
+before looking would risk our own mail landing in spam.
+
+**Deployment,** on Vercel's free tier. Only one person can currently
+deploy — the last remaining single-person dependency, and it's now logged
+as one.
+
+**A real bug, and why I looked in the wrong place first:**
+
+Password reset was failing — "link expired or already used," less than a
+minute after receiving the email. My first assumption was a code bug. The
+logs settled it:
+
+```
+17:08:16   200   POST /auth/v1/verify
+17:08:16   403   POST /auth/v1/verify
+```
+
+Two verifications in the same second. The first succeeds, the second
+fails — meaning the link had been opened twice, though I'd only clicked it
+once. The actual cause: corporate mail systems (Microsoft/Exchange and most
+enterprise gateways) pre-fetch links inside emails to scan them before
+display. Our tokens are single-use, so the scanner consumed it before I
+ever clicked — and my morning test on Gmail had worked precisely because
+Gmail doesn't do this.
+
+**The fix: require a human action.** The confirmation link no longer
+silently validates on page load — it's a page with a button. A link
+scanner performs a plain GET and leaves nothing consumed; only an actual
+form submission triggers validation. It costs one click, and it protects
+exactly the members most likely to have a professional email address — the
+working alumni the whole network exists for.
+
+Added a "resend the link" button alongside it. An expired link used to be
+a dead end — restart signup with an address that's already taken, which
+just produces a second error. Cheap to fix, costly to leave broken.
+
+**An hour lost, and the lesson that earns it:**
+
+Fix written, tested, pushed — and the problem persisted. I re-read the
+code, chased increasingly unlikely causes, requested more logs.
+
+The fix had never actually deployed. Vercel was silently rejecting the
+build for a reason with nothing to do with the code: my
+`git config user.email` literally contained the placeholder string
+`TON_EMAIL_GITHUB`, copied verbatim instead of filled in. Vercel blocks
+commits whose author doesn't match a GitHub account, and kept serving the
+previous version. The site looked fine, nothing appeared broken, and the
+change simply didn't exist.
+
+**Renamed the pôle mentorat to tutorat** — no, that was yesterday; today's
+lesson is narrower and more useful: **when a change "doesn't take," the
+first move is to verify it's actually live, not to re-read the code.** A
+ten-second probe — open the confirmation URL with a fake token and check
+whether the new page renders — would have replaced an hour of guessing.
+And more generally: **a silent failure is the worst kind.** Nothing
+crashed, no alert fired, the site stayed up. That's exactly what makes this
+class of bug slow to find — there's nothing to see until you look in the
+right place.
+
+## What I decided (and why)
+
+- **OVH for email sending, not a dedicated transactional service.** A
+  specialized provider adds a new data processor that has to be named in
+  the charter (with an EU-transfer clause to get right), which forces a new
+  charter version and a full re-acceptance from every member. OVH already
+  appears in the legal notice and already hosts the association's mail —
+  reusing it avoids a new declaration entirely. Giving up deliverability
+  stats is an acceptable trade at this scale.
+- **DMARC starts in monitoring mode, not enforcement.** Blocking mail
+  before seeing who's actually sending as us risks silently dropping our
+  own legitimate mail. Reports first, tightening later.
+- **Email confirmation requires an explicit click, not a page load.**
+  Corporate link-scanners consuming single-use tokens on page load isn't a
+  hypothetical edge case — it's the exact population (working alumni on
+  professional email) the platform is built to reach. A button costs one
+  click and fixes it for good.
+- **When a fix doesn't take effect, verify deployment before re-reading
+  code.** The hour lost wasn't a debugging failure so much as a diagnostic
+  ordering failure — I read the code before I checked whether the code was
+  even live. That order is now the default: probe first, then reason about
+  the source.
+
+## What's next
+
+- Get the charter formally adopted by the bureau in a meeting, and record
+  it — the platform enforces version-matching now, but the bureau itself
+  hasn't ratified the current text as a group.
+- Fix the mobile tab bar, which currently gets cut off at "Tutorat" — a tab
+  nobody can see doesn't exist in practice.
+- Two open questions that aren't technical but matter more: the code
+  license granted to the association, and the filing in the register of
+  agreements — both logged in the decisions journal for follow-up.
+- The next step isn't development anymore: invite the first person who
+  didn't build this platform.
