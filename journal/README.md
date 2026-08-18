@@ -775,3 +775,19 @@ right place.
   agreements — both logged in the decisions journal for follow-up.
 - The next step isn't development anymore: invite the first person who
   didn't build this platform.
+# 2026-08-16 —
+## What I did
+I reused the logo and visual identity of our LinkedIn account (designed by Enzo) to improve the website's design.
+
+We received a response to the email we sent to the group of teachers. Thanks to their feedback, we identified several inconsistencies between our objectives and what was written in the association's statutes, particularly regarding the membership fee. Initially, we wanted membership to be free, but we quickly realized that this would not be financially sustainable given the costs of the server, insurance, domain name, and events.
+
+This email also highlighted one of our biggest mistakes: we had not yet contacted the headmaster of the high school. This should have been one of our first steps before moving forward with the project.
+
+Unfortunately, I also reached my weekly usage limit on Claude.ai, which means I have to wait until Thursday before I can continue working on the website. This unexpected break made me realize how dependent I had become on AI tools. Perhaps I confused speed with haste. In my attempt to move as quickly as possible, I did not always take the time to fully understand every tool I was using. Moreover, most of my session reports were written by Claude simply because I lacked the time to write them myself.
+
+As a result, I plan to revisit these reports and make them more personal. I have not yet decided whether I will rewrite them completely or simply edit them while leaving some trace of the original AI-assisted version.
+
+## What remains to be done
+Reply to Thamma's email.
+Amend the association's statutes.
+Inform the school administration, especially the headmaster, about the project.
