@@ -791,3 +791,138 @@ As a result, I plan to revisit these reports and make them more personal. I have
 Reply to Thamma's email.
 Amend the association's statutes.
 Inform the school administration, especially the headmaster, about the project.
+
+# 2026-08-20 — Statutes, dues, and a platform that stops guessing
+
+Long day. A bureau meeting that ran until midnight, and a full working session
+on the platform before it. Almost everything I fixed today came from someone
+else using the app, not from my own testing — which is the point I want to
+remember from this session.
+
+## What I did
+
+**Association — the meeting.** Two hours on the statutes, the dues, the
+relationship with the lycée, and the pôles. I recorded it, the recording cut
+halfway through, so the minutes exist in two parts and I've published both.
+
+Decisions worth keeping: **dues at €10 a year for everyone**, tutoring stays
+collective (webinars and small groups) rather than paid individual lessons,
+and tutorat and mentorat become two separate pôles instead of one blurred
+thing. Also a hard admission: we've been using the lycée's name, its façade
+and its visual identity for weeks **without a written agreement**. That has to
+be fixed before the pre-rentrée communication goes out, not after.
+
+**Statutes, version 7.** Article 6 rewritten — €10 for every category, no
+exemption, no differentiated scale. That change alone contradicted three other
+articles, which is what took the time: article 5 still said the annual
+confirmation was free, article 8 still made non-payment a ground for losing
+membership, article 9 still described dues as hypothetical.
+
+I also added an **article 11 bis on bank accounts**: three signatories
+(president, treasurer, one designated vice-president), read-only access for
+the whole bureau, credentials never shared, and access withdrawn within
+fifteen days of leaving office. The last two are the ones that actually matter
+in a student association where the bureau turns over every year.
+
+And I corrected article 7, which claimed memberships are accepted
+automatically on signup. They aren't — the app holds every account until the
+bureau validates it. The statutes described a platform that doesn't exist.
+
+**Platform.** A long list, almost all of it reported by Romain and Enzo
+testing the site rather than found by me:
+
+- The charter's § 10 announced "tick the box below" followed by a `☐`
+  character typed into the Markdown. There was no box. Romain tried to click
+  it and asked whether he was allowed to accept. The section now describes the
+  real mechanism, and the page states where the reader stands — version
+  accepted and date, or what's missing.
+- Profile photos can be cropped and zoomed, and re-cropped later without
+  re-uploading the file. That meant storing the original alongside the square,
+  ~150 kB more per member.
+- Job, company, and role-in-the-association added to profiles. The sector list
+  was a business-school list — finance, consulting, audit — so a parent who is
+  an engineer or a nurse had nothing but "Other". Fourteen sectors added.
+- The profile form now hides what doesn't concern you: no employer field for a
+  student still in prépa, no filière fields for a parent.
+- "I can help with" became "you can ask me about", opened beyond prépa
+  subjects to fifteen professional and orientation topics — and opened to
+  parents, who were excluded from it entirely.
+- A notification bell, an unread counter on the feed tab, and a banner for
+  incomplete profiles.
+- Links in free text are now clickable. Someone posted a real internship offer
+  ending in "to apply: https://…" and the address was plain black text.
+
+**A genuine bug I introduced.** Removing a profile photo failed with *Direct
+deletion from storage tables is not allowed*. I had given the cleanup job to a
+database trigger doing `delete from storage.objects`; Supabase forbids that
+now, and the failed trigger rolled back the whole transaction. I'd made the
+same bet on CV files five days earlier — that one had never run, so nobody had
+seen it fail.
+
+**And I deleted my own account by mistake**, from the Supabase dashboard,
+confusing it with a test account. Locked out, no password, no reset email —
+because there was no account left to send one to. The screen inside the app
+makes you retype your email address before deleting. The dashboard doesn't ask
+anything.
+
+## What I decided (and why)
+
+- **Non-payment suspends the vote, not membership.** Radiating a
+  préparationnaire over €10 costs the association more than it collects, and
+  article 2 promises access "without distinction". Voting rights and quorum
+  counting are suspended until payment; the annuaire, the feed and the events
+  stay open. Article 8's clause disappeared accordingly.
+- **A text describing a screen must describe the screen that exists.** Both
+  the charter's phantom checkbox and article 7's automatic admission came from
+  the same habit: writing the document from a model rather than from the
+  product. Both are corrected, and the rule I'm keeping is to re-read any such
+  text in front of the screen it describes.
+- **No notifications table.** The obvious build is one row per member per
+  event, with read/unread state and a purge to write — two hundred rows for a
+  single post. Everything the bell announces is already derivable: one column
+  holding the last visit to the feed, compared to the date of the last post.
+  What I give up is history: a notification disappears when the thing is done,
+  not when it's been seen.
+- **Keep the original photo, or "re-crop" is a lie.** Re-cropping the stored
+  512 px square would only ever tighten the frame and degrade the image each
+  time. Storing the full photo at 1024 px is the price of a crop you can
+  actually revisit.
+- **The emblem is not the favicon.** Enzo's crest is line art — at the 16
+  pixels a browser tab actually renders, six floors of windows become a gold
+  smudge. The `.ico` now holds eight images: the real crest from 32 px up
+  (bookmarks, pinned tabs, search results), a simplified façade below. Nobody
+  ever sees two sizes side by side.
+- **Storage cleanup moves to the client, tracking stays in the database.** The
+  file is deleted through the storage API from the screen that owns it; the
+  trigger no longer deletes, it records what lost its row in a
+  `fichiers_orphelins` table. The screen can be closed mid-action — the
+  database can't forget.
+- **Stop showing controls that command nothing.** Founders and
+  super-admins publish and validate regardless of the two permission
+  checkboxes shown next to their names. The checkboxes were decorative, and
+  disabled on top of that. They're gone for those roles — they stay where they
+  mean something, which is the teacher or the future maintainer given
+  validation rights without publishing rights.
+
+## What's next
+
+- **Before opening to people outside the bureau:** a captcha on signup, the
+  orphan-file cleanup job, the GDPR processing register (mandatory, and it
+  doesn't exist), and the data-processing agreements to accept with Supabase
+  and Vercel on behalf of the association.
+- **This week, regardless:** rotate the SMTP password (it appeared in a
+  screenshot days ago and I still haven't done it), start dumping the database
+  before every migration — the free tier has no automatic backups — and add a
+  daily ping so the project isn't paused after seven idle days.
+- **Association:** get statutes v7 adopted in an extraordinary general
+  meeting, file them with the prefecture, and write to the headmaster before
+  any further use of the lycée's name.
+- Two questions still open for the bureau: whether the pôle Association needs
+  a secretary general in the list of functions, and whether to allow an
+  individual dues waiver for a member without means.
+
+---
+
+*Note on the date: this session ran into the night of 20 August and the
+meeting ended around midnight. Published the following day, dated to the day
+of the work.*
