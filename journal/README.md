@@ -926,3 +926,122 @@ anything.
 *Note on the date: this session ran into the night of 20 August and the
 meeting ended around midnight. Published the following day, dated to the day
 of the work.*
+
+# 2026-08-22 — Reaching out before the money works
+
+Almost no code today. The session was about who we tell, when, and what we
+can't promise yet — nine days before the rentrée, with a bank account that
+doesn't exist and a platform that can't take a euro.
+
+## What I did
+
+**Wrote to an HGG teacher.** A personal email, not a press release: how the
+idea came out of the oral exams, what the association is now (declared with
+the prefecture, a bureau of seven, five pôles), and one concrete reason for a
+teacher to care — a student in prépa can be followed by an alumnus who sat the
+same orals two years earlier. Alexandre validated it: *"we're only letting her
+know, we're not asking her to do anything."* That last point is the whole
+register of the message.
+
+Two things I fixed in my own draft, and they're the same mistake twice. I had
+announced "three things" and then listed three abstractions — *keep the link,
+give access, open contacts* — which forces the reader to count and gives them
+nothing to picture. And I had written "this is what concerns you most
+directly", which tells a teacher what concerns her. Concrete complements do
+the work on their own: *for the orals, a school, an internship.*
+
+**A network problem that isn't ours.** Alexandre couldn't reach the site from
+his work laptop; his personal machine works, and everyone else got through.
+Corporate firewall, almost certainly. Worth recording because the first
+instinct was to look at the deployment — and the deployment was fine.
+
+**The bureau's evening, on WhatsApp.** Most of the substance of this entry
+comes from there rather than from the keyboard.
+
+- **Pre-rentrée event fixed for 29 August**, with 19 alumni expected.
+- **Bank account.** Lucas went through the Crédit Mutuel terms properly and
+  wrote to his adviser: the association's statutory object in full, then two
+  precise questions — which tariff bracket we actually fall into (movement
+  commissions? is remote banking included? what does a year cost, all in?),
+  and whether the account must be attached to the branch nearest the
+  registered office or can sit in Saint-Maur or Ormesson. The "clarity
+  agreement" banks publish is abstract enough that asking for a number is the
+  only way to get one.
+- **Tutors and mentors have heard nothing since late July**, nine days out.
+  Rayou raised it, and he was right to.
+- **The presentation deck**, iterated all afternoon: text too small, the
+  opening framing too academic to speak to parents, a placeholder building
+  instead of our emblem, the bureau reduced to the seven founders, and a
+  "free" mention at the top of a deck that announces €10 at the bottom.
+
+**Effort spent twice.** Rayane was already rewriting the deck when I launched
+my own version through Claude — *"don't burn tokens, I'm on it"*. Two people
+redesigning the same document in parallel for twenty minutes, because neither
+said what he was doing before starting. The merged result is better than
+either draft, which is not an argument for the method.
+
+I've deliberately left out the identification banter from the start of the
+thread. Same rule as the meeting minutes: what concerns people rather than the
+association doesn't go into a document that's kept.
+
+## What I decided (and why)
+
+- **Announce the tutors' charter now, and say plainly that remuneration is
+  being explored.** The instinct was to wait for an answer on funding before
+  writing to the tutors, so as not to promise what we can't pay. Rayou's
+  objection settled it: an answer isn't expected before mid-September, by
+  which point the tutors will have their own term to think about and will be
+  gone. Either we play sincerity — there may be remuneration, it isn't settled
+  — or we announce nothing at all. Silence for six more weeks isn't the
+  cautious option, it's the one that loses the people.
+- **Ask the teachers to relay the message, in reply to all, rather than
+  texting one of them privately.** We have a phone number and it would have
+  been faster. But the other teachers were in copy on the original mail:
+  answering there means everyone has the same information, and no one is put
+  in the position of a private go-between. We ask nothing of anyone — that's
+  what makes the request acceptable.
+- **Explain the project to the first-years face to face; send the deck
+  afterwards.** A first-year opening a full presentation before anyone has
+  spoken to them reads a wall of information about a structure they've never
+  heard of. The deck is good — it's the second step, not the first.
+- **Never ask the lycée for the list of students.** Standing rule, restated
+  because the question came up again in a practical form: *can she get us the
+  list?* She can't give it, and we can't use it. Each person signs up
+  themselves; that's already the architecture of the platform.
+- **Don't open the platform beyond the bureau until payment works.** Members
+  registered before dues exist are members you then have to go back and charge
+  — the most thankless message an association can send. The chain is
+  bank account → HelloAsso → dues → opening, and it can't be reordered.
+  The margin is under a month and a half, and it's shrinking.
+- **The branch is chosen for the adviser, not the calendar.** Three days
+  between the 28th and the 1st against an adviser in Saint-Maur who knows the
+  local firms, and possibly Berthelot itself. We're not in a three-day hurry.
+- **The €10 goes on a slide of the deck, and "free" comes off the header.**
+  Announcing the amount up front costs nothing and buys the right to be
+  believed on the rest. A deck that says "free" at the top and €10 at the
+  bottom doesn't look cheap, it looks careless.
+- **Our own emblem, and no mention of the private LinkedIn group.** The deck
+  carries LinkedIn, Facebook, Instagram and the platform link — four ways in.
+  The private group is announced inside the platform's feed, where the people
+  it concerns already are. A door for members doesn't belong on the poster.
+
+## What's next
+
+- **Rotate the SMTP password.** Third entry in a row it appears, still not
+  done. It's ten minutes, and it must be updated on the Supabase side at the
+  same time or signup mails stop leaving.
+- **Apply the three fixes to the minutes automation** — the FastAPI `/pdf`
+  route, the Code node that treats a string as an object, the prompt that
+  sorts before it writes. Written a day ago, still not applied.
+- **Send the reply to the teachers**, with the template and a short generic
+  message for the incoming first-years, and write the mail on tutor
+  remuneration.
+- **Everyone re-reads statutes v7 for typos**, then convene the extraordinary
+  general meeting. Until it's held, v6 is the text that governs.
+- **Event on 29 August**, 19 alumni.
+- **Bank:** wait for the adviser's answer; appointments can be booked from
+  September. HelloAsso follows the account, not the other way round.
+- **The platform has still never been opened on a phone.** Fifteen screens,
+  and the first outside report we got this week was a network refusing to
+  reach it.
+
