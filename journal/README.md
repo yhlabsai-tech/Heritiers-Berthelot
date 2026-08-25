@@ -1045,3 +1045,193 @@ association doesn't go into a document that's kept.
   and the first outside report we got this week was a network refusing to
   reach it.
 
+
+# 2026-08-23 — Shipped, pushed, and still not live
+
+A long day, and a theme I didn't choose: almost everything that went wrong was
+something that looked finished and wasn't. A banner that existed but was
+hidden. A link that was displayed but not clickable. A backup command that ran
+and saved nothing. A migration pushed to the database while the code that used
+it sat uncommitted on my disk. And a sentence sent to eight people with two
+paragraphs collided in the middle of it.
+
+## What I did
+
+### The meeting minutes — rewritten, then made to run
+
+**The old prompt was three lines: "summarize this meeting in JSON".** The
+output was soft because the instruction was. A transcript isn't a text to
+summarize, it's a recording of a conversation: people talk about the
+association, and also about a shoulder, the price of Macs, and who should have
+been president. A model told to *summarize* treats all of it equally and
+returns minutes where "Yanis has recovered his shoulder mobility" sits next to
+"the lycée is paying €1,000".
+
+The new prompt sorts first and writes second: keep only what commits the
+association, qualify each item into exactly one category (decision, task,
+lead, unresolved, point raised), then write one self-contained sentence for a
+reader who wasn't there. What must never appear is listed by name — health,
+private life, family, housing, personal finances, personal plans, judgments
+about people, off-topic conversation — and is ignored *in silence*: not
+summarized, not flagged, not recorded as having taken place. Figures are
+quoted with their unit and period. People are named to carry a task, never an
+opinion. No section has a minimum: an empty list is a correct answer.
+
+I also wrote out, in advance, what the prompt *should* produce for the
+21 August meeting. That's the only test worth having.
+
+**Then the flow itself**, and four settings the documentation treated as
+given, none of which were: `temperature` is refused outright by the model
+(`400 — Unsupported parameter`); `HTTP Request1` was sending no body at all
+because `specifyBody` fell back to its `keypair` default; the disk-writing
+node didn't exist in either flow; and n8n now refuses to write outside
+`~/.n8n-files` unless `N8N_RESTRICT_FILE_ACCESS_TO` says otherwise. The Docker
+volume mount is the one thing still open.
+
+### The platform
+
+**The banner was invisible on phones — on purpose.** It was hidden below 640
+pixels, with the reasoning written in the file: stretched across a phone, a
+5.9:1 image drops to 63 pixels tall and the signature becomes unreadable. The
+reasoning was right and the conclusion was wrong. Treating a display defect
+with an absence removes the identity exactly where most members open the site.
+
+My first fix imposed a height of 96 pixels. I simulated it before deploying,
+and that saved me: at 320 pixels wide the wordmark touched the edge. A height
+in pixels crops *more* the narrower the screen — the opposite of what's
+needed. The shipped version imposes a **ratio**, 4:1, so 68 % of the width
+survives at every size and the framing is identical on an iPhone SE and a Pro
+Max.
+
+**Caen didn't exist.** The city list held fourteen French towns, chosen by hand
+one evening of initial schema. A field that refuses a true answer is a field
+that lies, and the member then has to lie too.
+
+Two steps, because I got the first one half right. First, opening the list for
+France with an explicit "Add" button, and a normalised key in the database —
+lowercase, unaccented, everything else reduced to hyphens — so "caen", "CAEN"
+and "Caen" return the same id, with the unique index on the key rather than
+the spelling. Then, when Yanis said he wanted to *type* Démouville and find
+it, not add it: the 34 969 communes of France, from the État's own dataset,
+loaded into a separate reference table and searched server-side.
+
+The suggestions are ranked by population, which is half the work: "paris"
+returns Paris before Parisot, "limoge" returns Limoges before Limoges-Fourches.
+The department is displayed because 2 234 communes share a name with another —
+fourteen Sainte-Marie.
+
+### The association
+
+**Sent the reply to the teachers**, with all of them and Romain in copy this
+time. It answers the four points raised: the contradiction between the dues
+announced in the mail and article 6 of the statutes; the fact that the
+prefecture filing happened before contacting the lycée's management, which
+article 1 didn't foresee in that order; the platform being online but not open;
+and the lack of women on the bureau, answered with the five names in the events
+pôle and with the admission that only the first elections will fix it.
+
+**Three defects went out with it, and they're worth recording.** A sentence
+stops mid-word — *"Pour les futurs premières années, nousPour le groupe
+WhatsApp"* — two paragraphs collided and nobody re-read the whole thing before
+sending. A placeholder I had left in a draft, `[adresse de l'association]`,
+was sent as-is: eight people are now invited to write to a pair of brackets.
+And the dues announced are **€10 for members in prépa or school, €35 for
+everyone else, per household** — a scale that is in no statute, that the
+bureau voted differently on 20 August, and that contradicts the correction the
+same mail was written to make.
+
+**Built the pre-rentrée invitation as a PDF**, from Yanis's text unchanged:
+banner letterhead, the practical details in a gold-bordered box, marine footer.
+The links weren't clickable in the first version — displayed but dead. Fixed,
+and verified in the file itself rather than by eye: two real link annotations.
+The Instagram address also carried an `?igsi=…` share token, which is what
+broke it.
+
+**And the invitation says "vendredi 29 août".** 29 August 2026 is a Saturday.
+
+### Three things I got wrong
+
+**The backup didn't run, and I caused it.** I handed over a command with a
+`#` comment appended; the shell passed it as arguments, `db dump` failed, and
+`db push` ran a minute later against a database with no backup. The migration
+applied cleanly, so nothing was lost — but the guard didn't guard. A command
+meant to be pasted carries no commentary.
+
+**A migration pushed while its code stayed uncommitted.** The database knew
+about `chercher_communes` for an hour while the site served a build that had
+never heard of it. My instructions listed the database commands and stopped
+there. Deploying is not one command, it's the shortest complete list.
+
+**Effort spent twice on the deck.** Rayou was already rewriting it when I
+launched my own version. Twenty minutes of two people redesigning the same
+document because neither said what he was doing first.
+
+## What I decided (and why)
+
+- **Minutes sort before they write, and what must never appear is ignored in
+  silence.** A line saying "a personal matter was also discussed" is itself the
+  disclosure, in a document that goes to seven people and is kept. Health data
+  is sensitive under article 9 of the GDPR: the absence has to be total,
+  including the absence of a mention of the absence.
+- **A ratio, not a fixed height.** A height in pixels crops more the narrower
+  the screen, which is backwards. A ratio keeps the same framing everywhere and
+  only changes the size. The general form: when a constraint must hold across
+  unknown screens, express it as a proportion, not a measurement.
+- **Two tables for cities, not one.** `communes` is a reference — the État's
+  list, nothing points at it, it exists to propose. `villes` stays the list of
+  places where someone actually lives, foreign cities included, and it's what
+  profiles reference. Merging them would have meant changing the type of
+  `villes.id` (a `smallint`, which stops at 32 767), then of
+  `profiles.ville_id`, then dismantling and rebuilding the views that depend on
+  it — on a database with no automatic backup, for no gain.
+- **The directory proposes only inhabited cities.** I argued for this, Yanis
+  pushed back twice, and testing settled it: a filter offering 34 969 cities of
+  which 34 900 return nobody makes you click for nothing. Typing a city works
+  where it matters — in the profile.
+- **The key decides identity, not the spelling.** `caen`, `CAEN` and `Caen` are
+  one city because the unique index is on the normalised key. Without it,
+  opening the field would have produced three Lyons and an unfilterable
+  directory.
+- **Announce the tutors' charter now, saying plainly that remuneration is being
+  explored.** No answer on funding is expected before mid-September, by which
+  point the tutors will have their own term to think about. Six more weeks of
+  silence isn't the cautious option, it's the one that loses the people.
+- **Ask the teachers to relay, in reply to all.** A private message to one of
+  them would have been faster, but the others were in copy on the original
+  mail: answering there means everyone has the same information and no one
+  becomes a private go-between.
+- **Never ask the lycée for the list of students.** Restated because it came
+  back in practical form. She can't give it and we can't use it. Each person
+  signs up themselves — that's already the architecture of the platform, and
+  it's the answer to her worry about passing on parents' addresses.
+- **Don't open the platform beyond the bureau until payment works.** Members
+  registered before dues exist are members you then have to go back and charge.
+  The chain is bank account → HelloAsso → dues → opening, and it can't be
+  reordered.
+- **The link text is the address.** The invitation displays exactly what it
+  points to. Showing one address and targeting another is the mechanism of
+  phishing, even when it's accidental — the same rule already applied to free
+  text inside the platform.
+
+## What's next
+
+- **Rotate the SMTP password.** Fourth entry in a row. It also has to be updated
+  on the Supabase side, or signup mails stop leaving.
+- **Correct the invitation**: the 29th is a Saturday, and "time: to be
+  confirmed" is the only information that decides whether anyone comes.
+- **Write to the teachers again** with the association's actual address, the
+  unfinished sentence completed, and — before anything else — a dues figure
+  that matches the statutes. Right now three different scales are circulating:
+  what the bureau voted, what the statutes say, and what the lycée has been
+  told.
+- **Finish the minutes flow**: mount the output folder in `docker-compose.yml`,
+  then run it end to end on an old recording.
+- **Statutes v7**: everyone re-reads for typos, then convene the extraordinary
+  general meeting. Until it's held, v6 governs.
+- **Event on 29 August**, 19 alumni. Contact M. Bolloré, submit the draft
+  agreement, open the bank account.
+- **The platform on a phone**: the home page is verified, the fourteen other
+  screens are not. The directory and its filters, the profile form, the feed
+  with its polls — in that order.
+
+
