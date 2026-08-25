@@ -1234,4 +1234,172 @@ document because neither said what he was doing first.
   screens are not. The directory and its filters, the profile form, the feed
   with its polls — in that order.
 
+# 2026-08-25 — Guards that guarded nothing
+
+Two days on the WhatsApp secretary, and a theme that arrived uninvited: almost
+every safety mechanism I checked this week turned out to protect nothing. A
+backup command that saved no data. Row-level security on a path where the
+writer bypasses it. An anti-duplicate index that catches a case that won't
+happen. A shared secret guarding a URL nobody outside this laptop can reach.
+None of them were wrong. All of them were somewhere else than where I thought.
+
+## What I did
+
+### The database
+
+**Reviewed brique 1 before pushing it, and corrected five things.** The
+migration Claude Code delivered was good — French comments explaining *why*,
+RLS on all four tables, a lock trigger on tasks. But
+`destinataire_par_defaut('evenementiel')` returned `null`, documented as
+expected behaviour because the pôle's SG post was vacant. That's not a
+behaviour, it's a hole: a task nobody takes, in a pôle with no holder, alerting
+nobody — exactly the task this system exists to catch. The président is now the
+fallback and effaces itself as soon as the post is filled.
+
+Also: `titre` could be empty, so a model returning `{"titre": ""}` created an
+invisible task. And the immutability of `collectes` and `decisions` rested on
+the absence of an `update` policy — which protects the application, and the
+application writes nothing here. n8n writes, with `service_role`, which sees no
+policy at all. Two `refuser_reecriture` triggers make the word "archive" true.
+
+**Then the thing that mattered most: the backups weren't backups.**
+`supabase db dump --linked` writes the **schema**, not the data. I opened the
+file: 69 KB, sixteen `CREATE TABLE`, zero `COPY`, zero `INSERT`. Three days of
+backups were empty skeletons. Worse, the rule that produced them is one I wrote
+into the project's own memory files, so it had been giving false comfort since
+the 23rd. A backup is now two files, one with `--data-only`. The first real one
+weighs 2 MB.
+
+**Aliases.** The model returns a WhatsApp display name; the database wants a
+UUID. Nothing connected the two, and the real names in the conversation are
+"Rayou" for Rayane, "~ Lucas" with the tilde WhatsApp adds for numbers absent
+from your contacts, "Romain Very (Essec)", "Elyes Bahnis(hec)". None of them
+match `prenom` or `nom`. Without the mapping, `responsable_id` stays null for
+everyone, every task falls to the group's default recipient, and the nominative
+email — the only output that counts — never happens.
+
+The table keys on the display name, not the person: one account, several
+aliases, and the unique index is on a normalised key so that a stray space or
+capital doesn't create a second alias. The tilde falls out with the
+normalisation, which makes the mapping immune to the one change we're certain
+to see.
+
+**And the routing was broken in production without anyone noticing.** Romain
+had no `fonction` in the database. `destinataire_par_defaut` looks the président
+up by function, so `bureau` and `general` both resolved to nobody — and
+`est_bureau()` requires a non-null function, so the président couldn't read the
+secretariat either. One `update` fixed it. It had been true since the tables
+were created.
+
+### The prompt
+
+**Brique 2, tested twice on the real conversation of 24 August**, with the
+expected output written before either run.
+
+What holds: the five expected tasks with the right owners, the statutes coming
+out as a single `creer` already `terminee`, an ambiguous "Jle fais" correctly
+leaving the SIREN task unassigned, "the week of 14 September" giving
+`echeance: null` rather than an invented Monday, and the negative check
+perfect — no trace of Elyes's move, of a phone number, of an off-topic link.
+
+What failed, both times, in the same place: **decisions.** Run A recorded an
+event cancellation that was reopened ten minutes later. I rewrote the rule with
+a procedure — re-read what follows the moment a decision appears settled — and
+run B stopped producing that one, but still recorded a teacher's suggestion
+repeated by one member, and invented a new one from a statement of fact.
+
+### The workflow
+
+**Brique 3 arrived written but never executed.** Reading it found three
+defects: a node deleted from the canvas while the code consuming it still
+called it by name, four edges converging on one input so the summary would run
+once per branch, and a Postgres array parameter built with `JSON.stringify`,
+which produces `["a","b"]` where Postgres wants `{a,b}` — verified by running
+it and getting `malformed array literal`.
+
+**Running it found four more**, none of which an import can catch: the Form
+Trigger pinned at `typeVersion: 1`, a version so old it ignores `fieldName`
+(so every downstream `$json.groupe` read `undefined`) and predates the Form
+Ending mechanism entirely; `responseMode: responseNode`, which makes n8n demand
+a literal Respond to Webhook node and refuse to listen without one; the four
+completion screens silently emptied because their title and message had been
+written inside `options` instead of at the top level; and `$env` access blocked
+by default in n8n 2.32, which I had asserted was open.
+
+**And a hole I opened myself, twice.** `service_role` carries `BYPASSRLS`, but
+bypassing row-level security grants no SQL privilege: `collectes` and `taches`
+had no `GRANT` for it, nor `EXECUTE` on `profil_par_alias()`. Nobody had
+noticed because nothing had ever written with that key. Claude Code found it by
+running the queries, not by reading the schema.
+
+### Three things that were said out loud and shouldn't have been
+
+The n8n encryption key and the database password went through a screenshot and
+a paste — the key that decrypts every credential stored in that instance, and
+the password that opens the association's database as owner. The SMTP password
+of `bonjour@`, fifth journal entry in a row, is still not rotated.
+
+## What I decided (and why)
+
+- **The model does not record decisions.** Three successive rules failed, each
+  differently, and the third produced an error the first two hadn't. Telling
+  "the bureau settled it" from "somebody said yes" requires knowing who binds
+  the association, which a WhatsApp transcript never says. And the asymmetry
+  runs the wrong way: tasks are correctable, `decisions` is an immutable
+  archive. What gets extracted automatically is what can be taken back.
+- **`termine_le` comes from the collecte's period, never `now()`, never a date
+  read from the text.** Accurate to the day, which is enough for minutes, and
+  never wrong — the model has no closure date in its schema and so cannot
+  invent one. Later, the screen where a human ticks "done" will write `now()`,
+  exact to the minute. Each writer knows its own truth; no trigger arbitrates
+  between them.
+- **No weekly reminder email.** A recurring "come look at the Drive" ends up in
+  a filter rule. The document link is pinned in each WhatsApp group's
+  description instead — no code, no state to keep, and it sits where they
+  already are every day. The mail that remains is rare and event-driven: one
+  grouped notification per person per day, then J+3 and J+7 if a task drags.
+- **The aliases are not versioned.** Twelve people's display names against
+  their account ids is personal data; in a git repository it is irreversible.
+  They go into the SQL editor by hand. A local `db reset` won't have them, and
+  for twelve rows that's the right price.
+- **The pôle members get no `fonction`.** In this schema `fonction` means
+  "bureau member", and `est_bureau()` keys on it — giving it to the five
+  événementiel members would open the bureau's own collectes to them. Their
+  reading surface is the Drive document for their pôle. If group membership
+  ever needs recording, it's a `membres_pole` table, not a hijacked column.
+- **Sonnet 5, because it's the only model with evidence behind it.** Cost
+  doesn't decide anything here — about ninety calls a month puts every tier
+  between one and eight dollars. What decides is obedience to negative
+  instructions, and the only measurements we have were taken against Claude.
+  Running a production system on a model no test has ever seen is the actual
+  risk.
+- **The Postgres credential connects as the database owner, and the
+  `service_role` grants are insurance for a path we don't use yet.** The
+  Postgres node speaks to Postgres directly, not through PostgREST, so it
+  authenticates with a username and password, not with the service key. The
+  grants migration is correct and will matter for brique 5 or any REST access —
+  but it is not what makes this workflow work, and the credential n8n now holds
+  can read and destroy everything.
+
+## What's next
+
+- **Commit what's on disk.** Six files are untracked or modified, including
+  `20260824130000_droits_du_service_role.sql`, which has been applied locally
+  by `db reset` and **never pushed to production**. The database and the
+  repository have drifted apart in both directions.
+- **Re-export the workflow.** The `workflow-collecte.json` in the repository is
+  the first version — the one with the three defects found by reading. Every
+  correction since lives only inside n8n.
+- **Two workflows now carry the same name**, one of them broken, because the
+  import created a new one instead of replacing. Archive the old.
+- **Rotate the SMTP password, and now the n8n encryption key too.**
+- **The form only exists on `localhost`.** Nobody but me can deposit anything,
+  which contradicts the one line of the specification that makes this survive
+  my absence: one installation, several depositors. Tunnel or VPS, to be
+  settled before this is announced to anyone.
+- **Lucas isn't registered on the platform.** The treasurer, on the association's
+  own platform, at the moment we're asking him to open a bank account and track
+  dues. The five événementiel members aren't either.
+- **Brique 4 and 5**: the Drive documents, one per group, then the mail flow.
+
 
