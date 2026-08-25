@@ -36,7 +36,7 @@ I finished the first end-to-end version of the meeting-minutes pipeline. A real 
 
 The main architectural change was separating analysis from formatting. Initially, I asked the LLM to analyse the transcript and generate the HTML email at the same time. On long inputs, it sometimes returned a polished but empty template. I therefore made the model return structured JSON only, and moved the HTML generation into a deterministic code step.
 
-I also stopped allowing the model to generate factual information such as dates. It had already invented dates and even returned raw PHP in one output. Dates and other factual values are now injected by the workflow itself.
+I also stopped allowing the model to generate factual information such as dates or imaginary tasks. It had already invented dates and even returned raw PHP in one output. Dates and other factual values are now injected by the workflow itself.
 
 A deliberately long test confirmed another limitation: a single-pass summary is not reliable for very long meetings. A chunking approach would be necessary, but I chose not to build it yet because real meetings are currently much shorter.
 
@@ -69,6 +69,8 @@ I also made a small but useful mistake: I installed Node.js because I thought Cl
 ## The session
 
 The association's founding documents were finalised and officially sent during the week. At the same time, I rebuilt the automation environment on my own MacBook so that the project no longer depended on another person's computer.
+
+I also stoped the diarisation on whisper. Before that an audio of 20 minutes was transcript in 28 minutes, way too long. Now on my computer it is around 4 minutes.
 
 The migration itself was more complicated than expected. The n8n data volume and the `.env` file contained different encryption keys, so n8n refused to start. I also had to reset the owner account and deal with an SSRF restriction in `n8n-mcp` before the tools worked correctly.
 
