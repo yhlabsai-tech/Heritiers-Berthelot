@@ -265,3 +265,33 @@ Finally, I found that sensitive credentials had appeared in screenshots or copie
 The central lesson is that **a safeguard is only useful if it protects the actual path through which the system operates**. RLS on a service-role write path is not a safeguard. A schema-only dump is not a backup. A prompt saying that decisions are important does not make the model a reliable source of immutable decisions.
 
 This session also reinforced a broader principle from the rest of the project: when the cost of being wrong is high, automation should stop and require a human to confirm the information.
+
+# 2026-08-26 — Two days on the wrong problem
+
+## The session
+
+Two more days on the WhatsApp automation, and it is still not finished. Four parts out of five now work — a conversation pasted into a form becomes tasks in the database, and the first real run pulled nine of them out of a day of messages without inventing anything. But the documents it is meant to write are still not connected, and the notification part has not been started.
+
+Most of those two days went into failures that reported success: every step green while the database stayed empty. The worst of them was a security mechanism I had built, and then spent two evenings debugging, because a note I had written myself claimed the tool had no built-in authentication. It has three.
+
+But the bugs are not what I got wrong.
+
+I chose to work on this automation instead of finishing what the platform actually needs: its security, its design, and making sure the whole thing is smooth to use.
+
+I still think the automation is a good idea, and I am not walking that back. People often stop contributing simply because they do not know what is left to do. Having every task visible at all times — who is on what, and which ones are free for anyone to pick up — will make the whole association run better. The problem is not the idea. It is when I chose to build it.
+
+And I do not have unlimited time in which to be wrong. I am on the Pro plan, and I reach the weekly limit one to four days before it resets, nearly every week. The tier above costs €100 a month, which the association does not have and neither do I. So this is not a temporary annoyance I can spend my way out of: I get four or five days of building a week, not seven, and I spent them on the wrong thing.
+
+Two obstacles moved, though, and neither the way we planned.
+
+We will not get the list of incoming students. It only exists the day before term starts, and the obstacle is the administration, not the teachers. But the same conversation opened a better route: summer assignments are published on the national admissions platform, which every incoming student already visits, and we can add our link there. It also fits a decision we made earlier — never accept a file of personal contact details from the school. We do not go and collect people; we make ourselves findable.
+
+And our welcome event has to move to the first week of September. It was built for the window when everyone is still home; a week later most alumni are back at their schools, and realistically only those near Paris will come. We kept the event and lost part of its audience.
+
+## Lessons learned
+
+**A good idea built at the wrong time is still a mistake.** I stand by the automation itself. But sequencing is a decision too, and I made it badly: I picked the problem I found most interesting over the one that was blocking everyone else.
+
+**A capped budget of hours is a design constraint.** Running out of tooling several days early is not a scheduling annoyance — it is the thing that should decide what I open on Monday morning.
+
+**Check a constraint before building around it.** One wrong sentence in my own notes cost two evenings, spent defending against a problem that did not exist.
