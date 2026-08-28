@@ -295,3 +295,25 @@ And our welcome event has to move to the first week of September. It was built f
 **A capped budget of hours is a design constraint.** Running out of tooling several days early is not a scheduling annoyance — it is the thing that should decide what I open on Monday morning.
 
 **Check a constraint before building around it.** One wrong sentence in my own notes cost two evenings, spent defending against a problem that did not exist.
+
+# 2026-08-27 — Asking a teacher to proofread the machine
+
+## The session
+
+I split the work across two Claude accounts: one keeps the WhatsApp automation, the other takes the platform's security and design. They were sharing a repository and stepping on each other. Then I paused the automation entirely — term starts in days, and it is not what the association needs this week. Same sequencing mistake as two entries ago, except this time I made the call before it cost me anything.
+
+Security took most of the two days. A policy written the week before would have broken the whole site if it had shipped, and it sat uncommitted because I could not prove it worked. The test I had planned — stay logged in, come back an hour later, click a link — proved nothing: a browser renews its own session for as long as a tab stays open, so I would have stayed logged in whether the code was right or broken. Closing the tab and waiting two hours was the only version that meant anything. It passed, and it went live.
+
+Then I asked one of my former maths teachers to try the site. She signed up, navigated it, and sent six remarks. Not one was a bug. An address overflowed its box on a phone. A sentence meant to encourage students to contact alumni opened with something close to a reproach, aimed at people who already feel they are intruding. A filter called a subject an "option" — the very subject taught by the teachers whose help we need most.
+
+Most of this site was written with AI, and that is exactly where such details slip through. The AI gave us a platform we could never have paid for. What it cannot do is sound like us. So we now ask teachers to be deliberately picky about wording and interface. That is not a correction applied to the project — it is the project: the machine builds it, people make it ours.
+
+Our welcome event on 29 August is cancelled. We still have no list of incoming students, and rather than run two small events we will run one bigger one in the first or second week of term. Next year we should reach them through the national admissions platform instead of waiting on a list.
+
+## Lessons learned
+
+**A test that cannot fail proves nothing.** Mine would have passed against broken code, because the browser was doing the work I was trying to attribute to the server. I now ask what result would tell me I am wrong.
+
+**Verify as the visitor you are testing for.** A file meant for search engines was being redirected to the login page. In my browser it looked perfect — because I was logged in.
+
+**AI can build the thing; it cannot make it sound like us.** All six remarks were about language and judgment. No amount of generated polish would have produced them.
