@@ -317,3 +317,30 @@ Our welcome event on 29 August is cancelled. We still have no list of incoming s
 **Verify as the visitor you are testing for.** A file meant for search engines was being redirected to the login page. In my browser it looked perfect — because I was logged in.
 
 **AI can build the thing; it cannot make it sound like us.** All six remarks were about language and judgment. No amount of generated polish would have produced them.
+
+# 2026-09-10 — Back to school, and the project stalls
+
+## The session
+
+With back to school, the project has lost velocity. The members of the association are less committed, and the high school and the head teacher are busy and do not respond to our mails.
+
+What we need now is a bank account, but the Qonto verification is taking longer than it should and is still pending.
+
+In clear terms, we are stuck. It is part of the process; the road is not linear.
+
+I am currently trying to remobilise the members of the association through messages, giving each of them clear tasks to do:
+
+- set up a meeting with Bolloré
+- run a session at the high school with the students and the teachers, and a meeting with the administration (Elyes)
+- follow up with the tutors and mentors (volunteers: Rayane for the ones he approached, Elyes for the 2006 cohort)
+- keep the WhatsApp community groups active
+- reach out to students for the tutoring and mentoring programme (volunteer: Enzo)
+- onboard Edgar, Samuel and possibly Paul-Antoine (volunteer: Rayane)
+- reactivate the event group (volunteers: everyone)
+- update the document for new members with the latest news (volunteer: Rayane)
+- finalise Qonto
+- build a payment interface on the platform (Yanis)
+
+## Lessons learned
+
+The project will be less exciting for me from now on: the platform is almost done. But if we want our work to last in the long run, we have to pursue our efforts to get a sustainable alumni network.
