@@ -344,3 +344,16 @@ I am currently trying to remobilise the members of the association through messa
 ## Lessons learned
 
 The project will be less exciting for me from now on: the platform is almost done. But if we want our work to last in the long run, we have to pursue our efforts to get a sustainable alumni network.
+
+2026-09-17 — Small hiccups, but we haven't let go
+The session
+
+The meeting-minutes automation is still giving me trouble. Nothing serious, just a couple of small bugs I'm chasing down — I'll finish it tomorrow.
+
+On the association side, there's real momentum back. We had a bureau call, and tomorrow Ryan, Lucas and Romain are going to Lycée Berthelot to talk to the first- and second-year students in classes A and B, and to try to catch the headmaster in person, since he still doesn't answer our emails — maybe it'll pass better face to face. We also got an email from Madame Tama today, asking how things are going to be organized on our end. A real sign of interest. We haven't let go these past weeks, and it shows. The onboarding period for the rest of the bureau is also running right now.
+
+One thing that's starting to weigh on me: the school still hasn't funded us. I'm on a Claude Pro plan at €20 a month, and between the association's work and what I now need for my own use in business school, I hit the weekly limit in three or four days. It's not a wall I can just push through by spending more time on it.
+
+Lessons learned
+
+An automation is like the network itself: it doesn't run on its own, it has to be kept alive and actually used. It's fine that things go quiet for a while — the point isn't to be active every single day, it's to not give up on it.
