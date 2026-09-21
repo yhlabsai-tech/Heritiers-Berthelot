@@ -357,3 +357,20 @@ One thing that's starting to weigh on me: the school still hasn't funded us. I'm
 Lessons learned
 
 An automation is like the network itself: it doesn't run on its own, it has to be kept alive and actually used. It's fine that things go quiet for a while — the point isn't to be active every single day, it's to not give up on it.
+
+
+# 2026-09-19 — The visit went well, the emails still don't
+
+## The session
+
+The one-hour inactivity logout is live and working. A small thing, but I like the tradeoff: even if someone leaves a session open on some computer, it closes itself and asks for the password again — more secure, and it forces people to reconnect on purpose.
+
+The real news is the association. We're sending the tutor and mentor charter out to everyone we'd reached before, and we already have about forty replies — mixed in with a fair number of people who don't answer at all, but a few who reply within minutes, which is always nice to see.
+
+Friday the 19th, we visited Lycée Marcelin Berthelot, and it went really well. The teachers were enthusiastic, genuinely behind us. They gave us an alumni list going back thirty years — not everyone, but enough to finally build a real verification step, so not just anyone can create an account on the platform. The administration is a different story: the headmaster still hasn't answered, though we got his secretary's email, so we'll try through her next.
+
+Next for me on the app: start laying out the payment and subscription pages, even though the Qonto account still isn't unblocked — we sent every document they asked for, and it's just sitting there.
+
+## Lessons learned
+
+Same pattern as the emails to the headmaster: a room with actual people in it moved things forward in one afternoon, in a way that weeks of messages hadn't.
